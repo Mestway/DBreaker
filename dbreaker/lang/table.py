@@ -1,5 +1,17 @@
 import agate
 
+class Type(object):
+
+    def __init__(self, name, *params):
+        self.name = name
+        self.params = params
+
+    def __str__(self):
+        p_string = ",".join(map(str, self.params))
+        if (p_string):
+            p_string = "(" + p_string + ")"
+        return self.name + p_string
+
 class ColumnDef(object):
 
     def __init__(self, name, ty, col_constraint):
