@@ -1,5 +1,6 @@
 import agate
 
+
 class Type(object):
 
     def __init__(self, name, *params):
@@ -12,21 +13,32 @@ class Type(object):
             p_string = "(" + p_string + ")"
         return self.name + p_string
 
+
 class ColumnDef(object):
 
-    def __init__(self, name, ty, col_constraint):
+    def __init__(self, name, ty, col_constraint=None):
         self.name = name
         self.ty = ty
         self.col_constraint = col_constraint
 
+    def __str__(self):
+        if (self.col_constraint):
+            return("%s %s %s" % (self.name, self.ty, self.col_constraint))
+        else:
+            return("%s %s" % (self.name, self.ty))
+
 
 class TableSchema(object):
 
-    def __init__(self, name, columns, tbl_constraint):
+    def __init__(self, name, columns, tbl_constraint=None):
         self.name = name
         self.columns = columns
-        self.tbl_constraint = tbl_constraint # table constraints
-        
+        self.tbl_constraint = tbl_constraint  # table constraints
+
+    def __str__(self):
+        col_string = ",".join(map(str, self.columns))
+        return "CREATE TABLE %s (%s);" % (self.name, col_string)
+
 
 class Table(object):
 
