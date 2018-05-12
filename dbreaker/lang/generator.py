@@ -13,12 +13,6 @@ types = ['CHARACTER(n)', 'VARCHAR(n)', 'BINARY(n)',
          'NUMERIC(p, s)', 'FLOAT(p)', 'REAL', 'FLOAT', 'DOUBLE PRECISION',
          'DATE', 'TIME', 'TIMESTAMP']
 
-# Potential column constraints
-col_constraints = ['NOT NULL', 'UNIQUE']
-
-# Potential table constraints
-table_constraints = ['PRIMARY KEY', 'UNIQUE', 'DEFAULT', 'CHECK']
-
 
 # CREATE TABLE
 def sample_schema(num_tables, num_columns):
@@ -28,7 +22,8 @@ def sample_schema(num_tables, num_columns):
         columns = []
         for j in range(0, num_columns):
             columns.append(sample_column(0.2))
-        table = TableSchema(name, columns)
+        tbl_constraint = sample_table_constraint(columns)
+        table = TableSchema(name, columns, [tbl_constraint])
         # TODO: Table constraints
         tableSchemas.append(table)
     return tableSchemas
@@ -39,8 +34,23 @@ def sample_name(N):
     return ''.join(random.choices(string.ascii_uppercase, k=N))
 
 
-def sample_constraint():
-    return random.choice(col_constraints)
+def sample_table_constraint(columns):
+    constraints = ['CHECK', 'PRIMARY KEY', 'UNIQUE']
+    name = sample_name(5) if random.random() < 0.5 else ""
+    constraint = random.choice(constraints)
+    if (constraint == 'CHECK'):
+        # exp = sample_expression()
+        return TableConstraint(constraint, None, [], name)
+    else:
+        cols = [col.name for col in columns]
+        cols = random.sample(cols, random.randint(0, len(cols)))
+        return TableConstraint(constraint, None, cols, name)
+
+# Given the name of a column, generate a constraint
+def sample_col_constraint(name):
+    nullCondition = "NOT" if random.random() < 0.5 else ""
+    name = sample_name(5) if random.random() < 0.5 else ""
+    return ColumnConstraint(name, nullCondition)
 
 
 # p being the probability there is a constraint
@@ -48,7 +58,7 @@ def sample_column(p=0.0):
     name = sample_name(5)
     ty = sample_type()
     if (random.random() < p):
-        constraint = sample_constraint()
+        constraint = sample_col_constraint(name)
         return ColumnDef(name, ty, constraint)
     else:
         return ColumnDef(name, ty)

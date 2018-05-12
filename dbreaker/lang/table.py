@@ -28,15 +28,55 @@ class ColumnDef(object):
             return("%s %s" % (self.name, self.ty))
 
 
-class TableSchema(object):
-
-    def __init__(self, name, columns, tbl_constraint=None):
+class ColumnConstraint(object):
+    """
+    columnConstraint:
+          [ CONSTRAINT name ]
+          [ NOT ] NULL
+    """
+    def __init__(self, name="", NOT=""):
         self.name = name
-        self.columns = columns
-        self.tbl_constraint = tbl_constraint  # table constraints
+        self.NOT = NOT
 
     def __str__(self):
-        col_string = ",".join(map(str, self.columns))
+        if self.name:
+            return "CONSTRAINT %s %s NULL" % (self.name, self.NOT)
+        else:
+            return "%s NULL" % (self.NOT)
+
+
+class TableConstraint(object):
+    """
+    [ CONSTRAINT name ]
+    {
+        CHECK '(' expression ')'
+    |   PRIMARY KEY '(' columnName [, columnName ]* ')'
+    |   UNIQUE '(' columnName [, columnName ]* ')'
+    }
+    """
+    def __init__(self, constraint, expression=None, columnNames=[], name=""):
+        self.name = name
+        self.constraint = constraint
+        self.expression = expression
+        self.columnNames = columnNames
+
+    def __str__(self):
+        if self.constraint == 'CHECK':
+            return "%s (%s)" % (self.constraint, self.expression)
+        else:
+            col_string = ",".join(self.columnNames)
+            return "%s (%s)" % (self.constraint, col_string)
+
+
+class TableSchema(object):
+
+    def __init__(self, name, columns, tbl_constraints=[]):
+        self.name = name
+        self.columns = columns
+        self.tbl_constraints = tbl_constraints  # table constraints
+
+    def __str__(self):
+        col_string = ",".join(map(str, self.columns + self.tbl_constraints))
         return "CREATE TABLE %s (%s);" % (self.name, col_string)
 
 
