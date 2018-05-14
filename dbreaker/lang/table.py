@@ -64,7 +64,7 @@ class TableConstraint(object):
         if self.constraint == 'CHECK':
             return "%s (%s)" % (self.constraint, self.expression)
         else:
-            col_string = ",".join(self.columnNames)
+            col_string = ", ".join(self.columnNames)
             return "%s (%s)" % (self.constraint, col_string)
 
 
@@ -76,7 +76,7 @@ class TableSchema(object):
         self.tbl_constraints = tbl_constraints  # table constraints
 
     def __str__(self):
-        col_string = ",".join(map(str, self.columns + self.tbl_constraints))
+        col_string = ", ".join(map(str, self.columns + self.tbl_constraints))
         return "CREATE TABLE %s (%s);" % (self.name, col_string)
 
 

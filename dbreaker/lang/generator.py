@@ -14,6 +14,20 @@ types = ['CHARACTER(n)', 'VARCHAR(n)', 'BINARY(n)',
          'DATE', 'TIME', 'TIMESTAMP']
 
 
+# Operators ordered by associativity
+# (https://en.wikipedia.org/wiki/Operator_associativity)
+left_operators = ['.', '[]', '*', '/', '%', '+', '-',
+                  '<', '>', '>=', '<=', '<>', '=', '!=',
+                  'AND', 'OR']
+right_operators = ['+', '-', 'NOT']
+other_operators = ['BETWEEN', 'IN', 'LIKE', 'SIMILAR', 'OVERLAPS',
+                   'CONTAINS', 'IS NULL', 'IS NOT NULL', 'IS FALSE']
+
+def sample_expression(tableSchema):
+    # TODO: Generate sample_expression (needs to be recursive and
+    # use tableSchema columns)
+    pass
+
 # CREATE TABLE
 def sample_schema(num_tables, num_columns):
     tableSchemas = []
@@ -28,12 +42,11 @@ def sample_schema(num_tables, num_columns):
         tableSchemas.append(table)
     return tableSchemas
 
-
 # Generates a random string of uppercase letters of given length N
 def sample_name(N):
     return ''.join(random.choices(string.ascii_uppercase, k=N))
 
-
+# Generates a table constraint given a list of column objects
 def sample_table_constraint(columns):
     constraints = ['CHECK', 'PRIMARY KEY', 'UNIQUE']
     name = sample_name(5) if random.random() < 0.5 else ""
@@ -43,13 +56,13 @@ def sample_table_constraint(columns):
         return TableConstraint(constraint, None, [], name)
     else:
         cols = [col.name for col in columns]
-        cols = random.sample(cols, random.randint(0, len(cols)))
+        cols = random.sample(cols, random.randint(1, len(cols)))
         return TableConstraint(constraint, None, cols, name)
 
 # Given the name of a column, generate a constraint
-def sample_col_constraint(name):
+def sample_col_constraint():
     nullCondition = "NOT" if random.random() < 0.5 else ""
-    name = sample_name(5) if random.random() < 0.5 else ""
+    name = sample_name(5) if random.random() < 0 else ""
     return ColumnConstraint(name, nullCondition)
 
 
@@ -58,7 +71,7 @@ def sample_column(p=0.0):
     name = sample_name(5)
     ty = sample_type()
     if (random.random() < p):
-        constraint = sample_col_constraint(name)
+        constraint = sample_col_constraint()
         return ColumnDef(name, ty, constraint)
     else:
         return ColumnDef(name, ty)
@@ -78,6 +91,7 @@ def sample_type():
             if p == 's':
                 params.append(random.randint(0, params[len(params) - 1]))
             else:
+                # TODO: For now, each type's parameters go from 0 - 30, but that needs to change
                 params.append(random.randint(0, 30))
         t = Type(s_type, *params)
     else:

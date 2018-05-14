@@ -27,10 +27,14 @@ class Select(object):
     def get_schema(self):
         return [f"c{i}" for i in range(len(self.vals))]
 
+    # SELECT [OPTIONS] A, B, C, D
+    # FROM [Table_expression]
+    # WHERE [Boolean Expression]
     def __str__():
         # TODO: convert the tree to a string
-        pass
-
+        return ("SELECT %s %s"
+                "FROM %s"
+                "WHERE %s") % (self.options, self.proj_items, self.table_expr, self.where_pred)
 
 # projectItem:
 #       expression [ [ AS ] columnAlias ]
@@ -42,8 +46,11 @@ class ProjItem(object):
         self.alias = alias
 
     def __str__():
-        # TODO: convert the tree to a string
-        pass
+        if self.alias:
+            # TODO: shouldn't AS be optional?
+            return "%s AS %s" % (self.expr, self.alias)
+        else:
+            return "%s" % (self.expr)
 
 
 # tableExpression:
