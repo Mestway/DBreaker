@@ -16,17 +16,56 @@ types = ['CHARACTER(n)', 'VARCHAR(n)', 'BINARY(n)',
 
 # Operators ordered by associativity
 # (https://en.wikipedia.org/wiki/Operator_associativity)
-left_operators = ['.', '[]', '*', '/', '%', '+', '-',
-                  '<', '>', '>=', '<=', '<>', '=', '!=',
-                  'AND', 'OR']
-right_operators = ['+', '-', 'NOT']
-other_operators = ['BETWEEN', 'IN', 'LIKE', 'SIMILAR', 'OVERLAPS',
-                   'CONTAINS', 'IS NULL', 'IS NOT NULL', 'IS FALSE']
+# left_operators = ['.', '[]', '*', '/', '%', '+', '-',
+#                   '<', '>', '>=', '<=', '<>', '=', '!=',
+#                   'AND', 'OR']
+# right_operators = ['+', '-', 'NOT']
+# other_operators = ['BETWEEN', 'IN', 'LIKE', 'SIMILAR', 'OVERLAPS',
+#                    'CONTAINS', 'IS NULL', 'IS NOT NULL', 'IS FALSE']
+
+math_operators = ['+', '-', '*', '/', '%']
+
+# Numeric types for numeric expressions...
+numeric_types = ['SMALLINT', 'INTEGER', 'BIGINT', 'NUMERIC(p, s)', 'DECIMAL(p, s)',
+                 'FLOAT(p)', 'REAL', 'DOUBLE PRECISION']
 
 def sample_expression(tableSchema):
     # TODO: Generate sample_expression (needs to be recursive and
     # use tableSchema columns)
     pass
+
+def sample_num_expression(tableSchema):
+    num_columns = []
+    for col in tableSchema.columns:
+        matches = [s for s in numeric_types if str(col.ty) in s]
+        if (len(matches) > 0):
+            num_columns.append(col)
+    if (len(num_columns) == 0):
+        # We can't do a number_expression
+        return None
+    else:
+        return number_expression(num_columns)
+
+def number_expression(cols):
+    # Return a boolean expression
+
+    p = random.random()
+    # Choose a random column
+    c = random.choice(cols)
+    if p < 0.33:
+        # Return a number
+        return c.name
+    elif p < 0.66:
+        # Return a parenthesis
+        n = number_expression(cols)
+        return ParenthesizedExpression(n)
+    else: 
+        # Return an operation...
+        left = number_expression(cols)
+        right = number_expression(cols)
+        op = random.choice(math_operators)
+        return BinaryExpression(left, op, right)
+
 
 # CREATE TABLE
 def sample_schema(num_tables, num_columns):
@@ -98,6 +137,12 @@ def sample_type():
         t = Type(s_type)
     return t
 
+test = None 
 for i in range(0, 100):
     for t in (sample_schema(3, 3)):
         print(t)
+        test = t
+
+print(test)
+print(sample_num_expression(test))
+

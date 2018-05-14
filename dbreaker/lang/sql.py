@@ -215,3 +215,22 @@ class Expr(object):
     def __str__():
         # TODO: convert the tree to a string
         pass
+
+class Expression:
+    pass
+
+class BinaryExpression(Expression):
+    def __init__(self, left, op, right):
+        self.left = left
+        self.op = op
+        self.right = right
+
+    def __str__(self):
+        return "%s %s %s" % (self.left, self.op, self.right)
+
+class ParenthesizedExpression(Expression):
+    def __init__(self, exp):
+        self.exp = exp
+
+    def __str__(self):
+        return  "(%s)" % (self.exp)
