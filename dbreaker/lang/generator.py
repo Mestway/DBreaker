@@ -24,6 +24,13 @@ types = ['CHARACTER(n)', 'VARCHAR(n)', 'BINARY(n)',
 #                    'CONTAINS', 'IS NULL', 'IS NOT NULL', 'IS FALSE']
 
 math_operators = ['+', '-', '*', '/', '%']
+function_operators = ['POWER(n, n)', 'ABS(n)', 'MOD(n, n)', 'SQRT(n)', 'LN(n)',
+                      'LOG10(n)', 'EXP(n)', 'CEIL(n)', 'FLOOR(n)', 'RAND()',
+                      'RAND_INTEGER(n)', 'ACOS(n)', 'ASIN(n)', 'ATAN(n)',
+                      'ATAN2(n, n)', 'COS(n)', 'COT(n)', 'DEGREES(n)', 'RADIANS(n)',
+                      'ROUND(n)', 'ROUND(n, n)', 'SIGN(n)', 'SIN(n)', 'TAN(n)',
+                      'TRUNCATE(n)', 'TRUNCATE(n, n)', 'PI()']
+unary_operators = ['-', '+']
 
 # Numeric types for numeric expressions...
 numeric_types = ['SMALLINT', 'INTEGER', 'BIGINT', 'NUMERIC(p, s)', 'DECIMAL(p, s)',

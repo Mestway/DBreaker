@@ -228,6 +228,25 @@ class BinaryExpression(Expression):
     def __str__(self):
         return "%s %s %s" % (self.left, self.op, self.right)
 
+class UnaryExpression(Expression):
+    # +Right or -Right
+    def __init__(self, op, right):
+        self.op = op
+        self.right = right
+
+    def __str__(self):
+        return "%s%s" % (self.op, self.right)
+
+class MathExpression(Expression):
+    # COS(3) or MOD(5, 3)
+    def __init__(self, op, **args):
+        self.op = op
+        self.args = args
+
+    def __str__(self):
+        arg_str = ",".join(self.args)
+        return "%s(%s)"
+
 class ParenthesizedExpression(Expression):
     def __init__(self, exp):
         self.exp = exp
