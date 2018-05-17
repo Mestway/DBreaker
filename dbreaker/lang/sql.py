@@ -239,13 +239,13 @@ class UnaryExpression(Expression):
 
 class MathExpression(Expression):
     # COS(3) or MOD(5, 3)
-    def __init__(self, op, **args):
+    def __init__(self, op, *args):
         self.op = op
         self.args = args
 
     def __str__(self):
-        arg_str = ",".join(self.args)
-        return "%s(%s)"
+        arg_str = ",".join(map(str, self.args))
+        return "%s(%s)" % (self.op, arg_str)
 
 class ParenthesizedExpression(Expression):
     def __init__(self, exp):

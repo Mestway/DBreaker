@@ -24,6 +24,7 @@ types = ['CHARACTER(n)', 'VARCHAR(n)', 'BINARY(n)',
 #                    'CONTAINS', 'IS NULL', 'IS NOT NULL', 'IS FALSE']
 
 math_operators = ['+', '-', '*', '/', '%']
+
 function_operators = ['POWER(n, n)', 'ABS(n)', 'MOD(n, n)', 'SQRT(n)', 'LN(n)',
                       'LOG10(n)', 'EXP(n)', 'CEIL(n)', 'FLOOR(n)', 'RAND()',
                       'RAND_INTEGER(n)', 'ACOS(n)', 'ASIN(n)', 'ATAN(n)',
@@ -48,28 +49,40 @@ def sample_num_expression(tableSchema):
         if (len(matches) > 0):
             num_columns.append(col)
     if (len(num_columns) == 0):
-        # We can't do a number_expression
+        # We can't do a number_expression... TODO: Figure out what to do here
         return None
     else:
-        return number_expression(num_columns)
+        return number_expression(num_columns, 5)
 
-def number_expression(cols):
+def number_expression(cols, max_depth):
     # Return a boolean expression
-
     p = random.random()
     # Choose a random column
     c = random.choice(cols)
-    if p < 0.33:
-        # Return a number
-        return c.name
-    elif p < 0.66:
+
+    if p < 0.25 or max_depth == 0:
+        # Return a number (include randomly generated numbers)
+        if (c is None):
+            return random.randint(0, 10)
+        else:
+            return random.choice([random.randint(0, 10), c.name])
+    elif p < 0.50:
         # Return a parenthesis
-        n = number_expression(cols)
+        n = number_expression(cols, max_depth - 1)
         return ParenthesizedExpression(n)
+    elif p < 0.75:
+        # Return a function expression
+        f = random.choice(function_operators)
+        args = f[f.find("(") + 1 : f.find(")")].count("n")
+        op = f[:f.find("(")]
+        number_args = []
+        for i in range(0, args):
+            number_args.append(number_expression(cols, max_depth - 1))
+        return MathExpression(op, *number_args)
     else: 
         # Return an operation...
-        left = number_expression(cols)
-        right = number_expression(cols)
+        left = number_expression(cols, max_depth - 1)
+        right = number_expression(cols, max_depth - 1)
         op = random.choice(math_operators)
         return BinaryExpression(left, op, right)
 
