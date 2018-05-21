@@ -13,33 +13,29 @@ types = ['CHARACTER(n)', 'VARCHAR(n)', 'BINARY(n)',
          'NUMERIC(p, s)', 'FLOAT(p)', 'REAL', 'FLOAT', 'DOUBLE PRECISION',
          'DATE', 'TIME', 'TIMESTAMP']
 
-
-# Operators ordered by associativity
-# (https://en.wikipedia.org/wiki/Operator_associativity)
-# left_operators = ['.', '[]', '*', '/', '%', '+', '-',
-#                   '<', '>', '>=', '<=', '<>', '=', '!=',
-#                   'AND', 'OR']
-# right_operators = ['+', '-', 'NOT']
-# other_operators = ['BETWEEN', 'IN', 'LIKE', 'SIMILAR', 'OVERLAPS',
-#                    'CONTAINS', 'IS NULL', 'IS NOT NULL', 'IS FALSE']
-
+# OPERATORS
 math_operators = ['+', '-', '*', '/', '%']
 
-function_operators = ['POWER(n, n)', 'ABS(n)', 'MOD(n, n)', 'SQRT(n)', 'LN(n)',
-                      'LOG10(n)', 'EXP(n)', 'CEIL(n)', 'FLOOR(n)', 'RAND()',
-                      'RAND_INTEGER(n)', 'ACOS(n)', 'ASIN(n)', 'ATAN(n)',
-                      'ATAN2(n, n)', 'COS(n)', 'COT(n)', 'DEGREES(n)', 'RADIANS(n)',
-                      'ROUND(n)', 'ROUND(n, n)', 'SIGN(n)', 'SIN(n)', 'TAN(n)',
-                      'TRUNCATE(n)', 'TRUNCATE(n, n)', 'PI()']
+function_operators = ['POWER(n, n)', 'ABS(n)']
+
 unary_operators = ['-', '+']
 
+comparison_operators = ['=', '<>', '!=', '>', '>=', '<', '<=']
+
+logical_operators = ['OR', 'AND', 'NOT', 'IS FALSE', 'IS NOT FALSE']
+
+string_operators = ['CHAR_LENGTH(n)', 'UPPER(n)']
 # Numeric types for numeric expressions...
 numeric_types = ['SMALLINT', 'INTEGER', 'BIGINT', 'NUMERIC(p, s)', 'DECIMAL(p, s)',
                  'FLOAT(p)', 'REAL', 'DOUBLE PRECISION']
 
-def sample_expression(tableSchema):
+def sample_expression(tableSchema, ty):
     # TODO: Generate sample_expression (needs to be recursive and
     # use tableSchema columns)
+    # Based on the type we want generate that thing...
+    pass
+
+def sample_boolean_expression(tableSchema):
     pass
 
 def sample_num_expression(tableSchema):
@@ -91,10 +87,10 @@ def number_expression(cols, max_depth):
 def sample_schema(num_tables, num_columns):
     tableSchemas = []
     for i in range(0, num_tables):
-        name = sample_name(7)
+        name = "T" + str(i)
         columns = []
         for j in range(0, num_columns):
-            columns.append(sample_column(0.2))
+            columns.append(sample_column(0.2, "C" + str(j)))
         tbl_constraint = sample_table_constraint(columns)
         table = TableSchema(name, columns, [tbl_constraint])
         # TODO: Table constraints
@@ -126,8 +122,9 @@ def sample_col_constraint():
 
 
 # p being the probability there is a constraint
-def sample_column(p=0.0):
-    name = sample_name(5)
+def sample_column(p=0.0, name=None):
+    if name is None:
+        name = sample_name(5)
     ty = sample_type()
     if (random.random() < p):
         constraint = sample_col_constraint()
@@ -163,6 +160,4 @@ for i in range(0, 100):
         print(t)
         test = t
 
-print(test)
 print(sample_num_expression(test))
-

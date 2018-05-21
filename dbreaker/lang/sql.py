@@ -219,7 +219,16 @@ class Expr(object):
 class Expression:
     pass
 
-class BinaryExpression(Expression):
+class NumberExpression(Expression):
+    pass
+
+class BooleanExpression(Expression):
+    pass
+
+class StringExpression(Expression):
+    pass
+
+class BinaryExpression(NumberExpression):
     def __init__(self, left, op, right):
         self.left = left
         self.op = op
@@ -228,7 +237,7 @@ class BinaryExpression(Expression):
     def __str__(self):
         return "%s %s %s" % (self.left, self.op, self.right)
 
-class UnaryExpression(Expression):
+class UnaryExpression(NumberExpression):
     # +Right or -Right
     def __init__(self, op, right):
         self.op = op
@@ -237,19 +246,29 @@ class UnaryExpression(Expression):
     def __str__(self):
         return "%s%s" % (self.op, self.right)
 
-class MathExpression(Expression):
+class MathExpression(NumberExpression):
     # COS(3) or MOD(5, 3)
     def __init__(self, op, *args):
         self.op = op
         self.args = args
 
     def __str__(self):
-        arg_str = ",".join(map(str, self.args))
+        arg_str = ", ".join(map(str, self.args))
         return "%s(%s)" % (self.op, arg_str)
 
-class ParenthesizedExpression(Expression):
+class ParenthesizedExpression(NumberExpression):
     def __init__(self, exp):
         self.exp = exp
 
     def __str__(self):
         return  "(%s)" % (self.exp)
+
+class ComparisonExpression(BooleanExpression):
+    def __init__(self, left, op, right):
+        self.left = left
+        self.right = right
+        self.op = op
+
+    def __str__(self):
+        return "%s %s %s" % (self.left, self.op, self.right)
+
