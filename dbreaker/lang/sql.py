@@ -30,11 +30,11 @@ class Select(object):
     # SELECT [OPTIONS] A, B, C, D
     # FROM [Table_expression]
     # WHERE [Boolean Expression]
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
-        return ("SELECT %s %s"
-                "FROM %s"
-                "WHERE %s") % (self.options, self.proj_items, self.table_expr, self.where_pred)
+        return ("SELECT %s %s\n"
+                "FROM %s\n"
+                "WHERE %s;") % (self.options, self.proj_items, self.table_expr, self.where_pred)
 
 # projectItem:
 #       expression [ [ AS ] columnAlias ]
@@ -45,7 +45,7 @@ class ProjItem(object):
         self.expr = expr
         self.alias = alias
 
-    def __str__():
+    def __str__(self):
         if self.alias:
             # TODO: shouldn't AS be optional?
             return "%s AS %s" % (self.expr, self.alias)
@@ -64,7 +64,7 @@ class TableRefList(object):
     def __init__(self, table_refs):
         self.table_refs = table_refs
 
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
         pass
 
@@ -77,7 +77,7 @@ class JoinExp(object):
         self.table_expr2 = table_expr2
         self.join_cond = join_cond
 
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
         pass
 
@@ -89,7 +89,7 @@ class UsingExp(object):
     def __init__(self, columns):
         self.columns = columns
 
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
         pass
 
@@ -112,7 +112,7 @@ class TableRef(object):
         self.alias = alias
         self.column_alias = column_alias
 
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
         pass
 
@@ -126,7 +126,7 @@ class SelectWithoutFrom(object):
         self.option = option
         self.proj_items = proj_items
 
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
         pass
 
@@ -144,7 +144,7 @@ class GroupItem(object):
         self.option = option
         self.expr_list = expr_list
 
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
         pass
 
@@ -168,7 +168,7 @@ class WindowRef(object):
         self.name = name
         self.body = body
 
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
         pass
 
@@ -179,7 +179,7 @@ class WindowBody(object):
         self.order_item = order_item
         self.partition_expr = partition_expr
 
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
         pass
 
@@ -190,7 +190,7 @@ class ColRef(object):
     def __init__(self, col_name):
         self.col_name = col_name
 
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
         pass
 
@@ -200,7 +200,7 @@ class Const(object):
     def __init__(self, val):
         self.val = val
 
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
         pass
 
@@ -212,7 +212,7 @@ class Expr(object):
         self.op = op
         self.vals = vals
 
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
         pass
 

@@ -23,7 +23,9 @@ unary_operators = ['-', '+']
 
 comparison_operators = ['=', '<>', '!=', '>', '>=', '<', '<=']
 
-logical_operators = ['OR', 'AND', 'NOT', 'IS FALSE', 'IS NOT FALSE']
+logical_operators = ['OR', 'AND']
+
+
 
 string_operators = ['CHAR_LENGTH(n)', 'UPPER(n)']
 # Numeric types for numeric expressions...
@@ -38,10 +40,17 @@ def sample_expression(tableSchema, ty):
         return sample_num_expression(tableSchema)
 
 def sample_boolean_expression(tableSchema):
+    # Try number vs. number
     left = sample_num_expression(tableSchema)
     right =  sample_num_expression(tableSchema)
-    op = random.choice(comparison_operators)
-    return ComparisonExpression(left, op, right)
+
+    if left is not None:
+        op = random.choice(comparison_operators)
+        return ComparisonExpression(left, op, right)
+    else:
+        vals = ['NULL', 'TRUE', 'FALSE']
+        col = random.choice(tableSchema.columns).name
+        return ComparisonExpression(col, '=', random.choice(vals))
 
 def sample_num_expression(tableSchema):
     num_columns = []
@@ -121,7 +130,7 @@ def sample_table_constraint(columns):
 
 # Given the name of a column, generate a constraint
 def sample_col_constraint():
-    nullCondition = "NOT" if random.random() < 0.5 else ""
+    nullCondition = "NOT " if random.random() < 0.5 else ""
     name = sample_name(5) if random.random() < 0 else ""
     return ColumnConstraint(name, nullCondition)
 
@@ -158,6 +167,27 @@ def sample_type():
         t = Type(s_type)
     return t
 
+def sample_projection(tableSchema):
+    cols = tableSchema.columns
+    num_columns = random.randint(1, len(cols))
+    if (num_columns == len(cols)):
+        return "*"
+    else:
+        # Select random # columns (# being num_columns)
+        random.shuffle(cols)
+        cols = [c.name for c in cols[0:num_columns]]
+        return ", ".join(map(str, cols))
+
+def sample_select(tableSchema):
+    # (self.options, self.proj_items, self.table_expr, self.where_pred)
+    options = ['ALL', 'DISTINCT']
+    option = random.choice(options)
+    proj_items = sample_projection(tableSchema)
+    table_expr = tableSchema.name # for now... could have to use some alias stuff later on
+    where_pred = sample_boolean_expression(tableSchema)
+    return Select(option, proj_items, table_expr, where_pred, None, None, None)
+
+
 test = None 
 for i in range(0, 100):
     for t in (sample_schema(3, 3)):
@@ -170,4 +200,5 @@ print("Number Expression")
 print(sample_num_expression(test))
 print("Boolean Expression")
 print(sample_boolean_expression(test))
-
+print("Sample SELECT")
+print(sample_select(test))
