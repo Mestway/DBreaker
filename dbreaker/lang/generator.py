@@ -8,10 +8,11 @@ import string
 # p = precision
 # s = scale
 # Array, Multiset, XML, INTERVAL, VARBINARY not supported on SQLfiddle...
-types = ['CHARACTER(n)', 'VARCHAR(n)', 'BINARY(n)',
-         'BOOLEAN', 'SMALLINT', 'INTEGER', 'BIGINT', 'DECIMAL(p, s)',
-         'NUMERIC(p, s)', 'FLOAT(p)', 'REAL', 'FLOAT', 'DOUBLE PRECISION',
-         'DATE', 'TIME', 'TIMESTAMP']
+# types = ['CHARACTER(n)', 'VARCHAR(n)', 'BINARY(n)',
+#          'BOOLEAN', 'SMALLINT', 'INTEGER', 'BIGINT', 'DECIMAL(p, s)',
+#          'NUMERIC(p, s)', 'FLOAT(p)', 'REAL', 'FLOAT', 'DOUBLE PRECISION',
+#          'DATE', 'TIME', 'TIMESTAMP']
+types = ['BOOLEAN', 'VARCHAR(n)', 'CHARACTER(n)', 'INTEGER', 'DECIMAL(p, s)']
 
 # OPERATORS
 math_operators = ['+', '-', '*', '/', '%']
@@ -30,18 +31,22 @@ numeric_types = ['SMALLINT', 'INTEGER', 'BIGINT', 'NUMERIC(p, s)', 'DECIMAL(p, s
                  'FLOAT(p)', 'REAL', 'DOUBLE PRECISION']
 
 def sample_expression(tableSchema, ty):
-    # TODO: Generate sample_expression (needs to be recursive and
-    # use tableSchema columns)
     # Based on the type we want generate that thing...
-    pass
+    if ty == 'BOOLEAN':
+        return sample_boolean_expression(tableSchema)
+    elif ty == 'NUMBER':
+        return sample_num_expression(tableSchema)
 
 def sample_boolean_expression(tableSchema):
-    pass
+    left = sample_num_expression(tableSchema)
+    right =  sample_num_expression(tableSchema)
+    op = random.choice(comparison_operators)
+    return ComparisonExpression(left, op, right)
 
 def sample_num_expression(tableSchema):
     num_columns = []
     for col in tableSchema.columns:
-        matches = [s for s in numeric_types if str(col.ty) in s]
+        matches = [s for s in numeric_types if str(col.ty).split("(")[0] in s]
         if (len(matches) > 0):
             num_columns.append(col)
     if (len(num_columns) == 0):
@@ -120,7 +125,6 @@ def sample_col_constraint():
     name = sample_name(5) if random.random() < 0 else ""
     return ColumnConstraint(name, nullCondition)
 
-
 # p being the probability there is a constraint
 def sample_column(p=0.0, name=None):
     if name is None:
@@ -160,4 +164,10 @@ for i in range(0, 100):
         print(t)
         test = t
 
+print("We are using this table for expressions:")
+print(test)
+print("Number Expression")
 print(sample_num_expression(test))
+print("Boolean Expression")
+print(sample_boolean_expression(test))
+

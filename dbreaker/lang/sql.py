@@ -264,6 +264,7 @@ class ParenthesizedExpression(NumberExpression):
         return  "(%s)" % (self.exp)
 
 class ComparisonExpression(BooleanExpression):
+    # C1 > 5
     def __init__(self, left, op, right):
         self.left = left
         self.right = right
@@ -271,4 +272,3 @@ class ComparisonExpression(BooleanExpression):
 
     def __str__(self):
         return "%s %s %s" % (self.left, self.op, self.right)
-

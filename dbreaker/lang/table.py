@@ -42,7 +42,7 @@ class ColumnConstraint(object):
         if self.name:
             return "CONSTRAINT %s %s NULL" % (self.name, self.NOT)
         else:
-            return "%s NULL" % (self.NOT)
+            return "%sNULL" % (self.NOT)
 
 
 class TableConstraint(object):
