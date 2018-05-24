@@ -25,12 +25,8 @@ comparison_operators = ['=', '<>', '!=', '>', '>=', '<', '<=']
 
 logical_operators = ['OR', 'AND']
 
-
-
 string_operators = ['CHAR_LENGTH(n)', 'UPPER(n)']
 # Numeric types for numeric expressions...
-numeric_types = ['SMALLINT', 'INTEGER', 'BIGINT', 'NUMERIC(p, s)', 'DECIMAL(p, s)',
-                 'FLOAT(p)', 'REAL', 'DOUBLE PRECISION']
 
 def sample_expression(tableSchema, ty):
     # Based on the type we want generate that thing...
@@ -48,23 +44,41 @@ def sample_boolean_expression(tableSchema):
         op = random.choice(comparison_operators)
         return ComparisonExpression(left, op, right)
     else:
-        vals = ['NULL', 'TRUE', 'FALSE']
+        vals = ['NULL']
         col = random.choice(tableSchema.columns).name
         return ComparisonExpression(col, '=', random.choice(vals))
 
-def sample_num_expression(tableSchema):
-    num_columns = []
+# Helper function for grabbing columns of a certain type
+def get_columns(tableSchema, types):
+    columns = []
     for col in tableSchema.columns:
-        matches = [s for s in numeric_types if str(col.ty).split("(")[0] in s]
+        matches = [s for s in types if str(col.ty).split("(")[0] in s]
         if (len(matches) > 0):
-            num_columns.append(col)
+            columns.append(col)
+    return columns
+
+def get_num_columns(tableSchema):
+    numeric_types = ['SMALLINT', 'INTEGER', 'BIGINT', 'NUMERIC(p, s)', 'DECIMAL(p, s)',
+                     'FLOAT(p)', 'REAL', 'DOUBLE PRECISION']
+    return get_columns(tableSchema, numeric_types)
+
+def get_string_columns(tableSchema):
+    boolean_types = ['BOOLEAN']
+    return get_columns(tableSchema, boolean_types)
+
+def get_boolean_columns(tableSchema):
+    string_types = ['VARCHAR(n)', 'CHARACTER(n)']
+    return get_columns(tableSchema, string_types)
+
+def sample_num_expression(tableSchema):
+    num_columns = get_num_columns(tableSchema)
     if (len(num_columns) == 0):
         # We can't do a number_expression... TODO: Figure out what to do here
         return None
     else:
-        return number_expression(num_columns, 5)
+        return number_expression(num_columns, 5, tableSchema.name)
 
-def number_expression(cols, max_depth):
+def number_expression(cols, max_depth, tableName):
     # Return a boolean expression
     p = random.random()
     # Choose a random column
@@ -75,10 +89,10 @@ def number_expression(cols, max_depth):
         if (c is None):
             return random.randint(0, 10)
         else:
-            return random.choice([random.randint(0, 10), c.name])
+            return random.choice([random.randint(0, 10), tableName + "." + c.name])
     elif p < 0.50:
         # Return a parenthesis
-        n = number_expression(cols, max_depth - 1)
+        n = number_expression(cols, max_depth - 1, tableName)
         return ParenthesizedExpression(n)
     elif p < 0.75:
         # Return a function expression
@@ -87,12 +101,12 @@ def number_expression(cols, max_depth):
         op = f[:f.find("(")]
         number_args = []
         for i in range(0, args):
-            number_args.append(number_expression(cols, max_depth - 1))
+            number_args.append(number_expression(cols, max_depth - 1, tableName))
         return MathExpression(op, *number_args)
     else: 
         # Return an operation...
-        left = number_expression(cols, max_depth - 1)
-        right = number_expression(cols, max_depth - 1)
+        left = number_expression(cols, max_depth - 1, tableName)
+        right = number_expression(cols, max_depth - 1, tableName)
         op = random.choice(math_operators)
         return BinaryExpression(left, op, right)
 
