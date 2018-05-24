@@ -1,7 +1,9 @@
 ## Python setup
 
-`pip install -r requirements.txt or conda install --file requirements.txt`
+Install requirements
 
-Install draco in editable mode
+`pip install -r requirements.txt` or `conda install --file requirements.txt`
+
+Install dbreaker in editable mode
 
 `pip install -e .`
