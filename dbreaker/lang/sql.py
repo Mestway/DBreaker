@@ -32,9 +32,12 @@ class Select(object):
     # WHERE [Boolean Expression]
     def __str__(self):
         # TODO: convert the tree to a string
-        return ("SELECT %s %s\n"
+        opt = ""
+        if self.options != "":
+            opt = str(self.options) + " "
+        return ("SELECT %s%s\n"
                 "FROM %s\n"
-                "WHERE %s;") % (self.options, self.proj_items, self.table_expr, self.where_pred)
+                "WHERE %s;") % (opt, self.proj_items, self.table_expr, self.where_pred)
 
 # projectItem:
 #       expression [ [ AS ] columnAlias ]

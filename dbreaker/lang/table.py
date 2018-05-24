@@ -79,6 +79,9 @@ class TableSchema(object):
         col_string = ", ".join(map(str, self.columns + self.tbl_constraints))
         return "CREATE TABLE %s (%s);" % (self.name, col_string)
 
+    def addConstraint(self, constraint):
+        self.tbl_constraints.append(constraint)
+
 
 class Table(object):
 

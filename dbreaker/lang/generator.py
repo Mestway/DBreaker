@@ -45,8 +45,9 @@ def sample_boolean_expression(tableSchema):
         return ComparisonExpression(left, op, right)
     else:
         vals = ['NULL']
-        col = random.choice(tableSchema.columns).name
-        return ComparisonExpression(col, '=', random.choice(vals))
+        boolean_compare = ['!=', '=']
+        col = tableSchema.name + "." + random.choice(tableSchema.columns).name
+        return ComparisonExpression(col, random.choice(boolean_compare), random.choice(vals))
 
 # Helper function for grabbing columns of a certain type
 def get_columns(tableSchema, types):
@@ -76,7 +77,7 @@ def sample_num_expression(tableSchema):
         # We can't do a number_expression... TODO: Figure out what to do here
         return None
     else:
-        return number_expression(num_columns, 5, tableSchema.name)
+        return number_expression(num_columns, 2, tableSchema.name)
 
 def number_expression(cols, max_depth, tableName):
     # Return a boolean expression
@@ -86,10 +87,7 @@ def number_expression(cols, max_depth, tableName):
 
     if p < 0.25 or max_depth == 0:
         # Return a number (include randomly generated numbers)
-        if (c is None):
-            return random.randint(0, 10)
-        else:
-            return random.choice([random.randint(0, 10), tableName + "." + c.name])
+        return random.choice([random.randint(0, 10), tableName + "." + c.name])
     elif p < 0.50:
         # Return a parenthesis
         n = number_expression(cols, max_depth - 1, tableName)
@@ -119,8 +117,9 @@ def sample_schema(num_tables, num_columns):
         columns = []
         for j in range(0, num_columns):
             columns.append(sample_column(0.2, "C" + str(j)))
-        tbl_constraint = sample_table_constraint(columns)
-        table = TableSchema(name, columns, [tbl_constraint])
+        table = TableSchema(name, columns)
+        if random.random() < 0.2:
+            table.addConstraint(sample_table_constraint(table))
         # TODO: Table constraints
         tableSchemas.append(table)
     return tableSchemas
@@ -130,15 +129,15 @@ def sample_name(N):
     return ''.join(random.choices(string.ascii_uppercase, k=N))
 
 # Generates a table constraint given a list of column objects
-def sample_table_constraint(columns):
+def sample_table_constraint(tableSchema):
     constraints = ['CHECK', 'PRIMARY KEY', 'UNIQUE']
     name = sample_name(5) if random.random() < 0.5 else ""
     constraint = random.choice(constraints)
     if (constraint == 'CHECK'):
-        # exp = sample_expression()
-        return TableConstraint(constraint, None, [], name)
+        exp = sample_boolean_expression(tableSchema)
+        return TableConstraint(constraint, exp, [], name)
     else:
-        cols = [col.name for col in columns]
+        cols = [col.name for col in tableSchema.columns]
         cols = random.sample(cols, random.randint(1, len(cols)))
         return TableConstraint(constraint, None, cols, name)
 
@@ -195,24 +194,31 @@ def sample_projection(tableSchema):
 def sample_select(tableSchema):
     # (self.options, self.proj_items, self.table_expr, self.where_pred)
     options = ['ALL', 'DISTINCT']
-    option = random.choice(options)
+    option = ''
+    if random.random() < 0.2:
+        option = random.choice(options)
     proj_items = sample_projection(tableSchema)
     table_expr = tableSchema.name # for now... could have to use some alias stuff later on
     where_pred = sample_boolean_expression(tableSchema)
     return Select(option, proj_items, table_expr, where_pred, None, None, None)
 
 
-test = None 
-for i in range(0, 100):
-    for t in (sample_schema(3, 3)):
-        print(t)
-        test = t
+# Generation code (in output files)
+print("How many tables do you want?");
+tables = int(input())
+print("How many columns in the tables?");
+columns = int(input())
+print("How many select statements per table?");
+selects = int(input())
 
-print("We are using this table for expressions:")
-print(test)
-print("Number Expression")
-print(sample_num_expression(test))
-print("Boolean Expression")
-print(sample_boolean_expression(test))
-print("Sample SELECT")
-print(sample_select(test))
+schemas = sample_schema(tables, columns)
+for index, schema in enumerate(schemas):
+    file = open("output/file" + str(index + 1) + ".sql","w+")
+    file.write(str(schema));
+    file.write('\n\n')
+    for i in range(0, selects):
+        select = sample_select(schema)
+        file.write(str(select))
+        file.write('\n\n')
+    file.close();    
+
