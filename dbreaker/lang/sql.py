@@ -27,10 +27,17 @@ class Select(object):
     def get_schema(self):
         return [f"c{i}" for i in range(len(self.vals))]
 
-    def __str__():
+    # SELECT [OPTIONS] A, B, C, D
+    # FROM [Table_expression]
+    # WHERE [Boolean Expression]
+    def __str__(self):
         # TODO: convert the tree to a string
-        pass
-
+        opt = ""
+        if self.options != "":
+            opt = str(self.options) + " "
+        return ("SELECT %s%s\n"
+                "FROM %s\n"
+                "WHERE %s;") % (opt, self.proj_items, self.table_expr, self.where_pred)
 
 # projectItem:
 #       expression [ [ AS ] columnAlias ]
@@ -41,9 +48,12 @@ class ProjItem(object):
         self.expr = expr
         self.alias = alias
 
-    def __str__():
-        # TODO: convert the tree to a string
-        pass
+    def __str__(self):
+        if self.alias:
+            # TODO: shouldn't AS be optional?
+            return "%s AS %s" % (self.expr, self.alias)
+        else:
+            return "%s" % (self.expr)
 
 
 # tableExpression:
@@ -57,7 +67,7 @@ class TableRefList(object):
     def __init__(self, table_refs):
         self.table_refs = table_refs
 
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
         pass
 
@@ -70,7 +80,7 @@ class JoinExp(object):
         self.table_expr2 = table_expr2
         self.join_cond = join_cond
 
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
         pass
 
@@ -82,7 +92,7 @@ class UsingExp(object):
     def __init__(self, columns):
         self.columns = columns
 
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
         pass
 
@@ -105,7 +115,7 @@ class TableRef(object):
         self.alias = alias
         self.column_alias = column_alias
 
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
         pass
 
@@ -119,7 +129,7 @@ class SelectWithoutFrom(object):
         self.option = option
         self.proj_items = proj_items
 
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
         pass
 
@@ -137,7 +147,7 @@ class GroupItem(object):
         self.option = option
         self.expr_list = expr_list
 
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
         pass
 
@@ -161,7 +171,7 @@ class WindowRef(object):
         self.name = name
         self.body = body
 
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
         pass
 
@@ -172,7 +182,7 @@ class WindowBody(object):
         self.order_item = order_item
         self.partition_expr = partition_expr
 
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
         pass
 
@@ -183,7 +193,7 @@ class ColRef(object):
     def __init__(self, col_name):
         self.col_name = col_name
 
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
         pass
 
@@ -193,7 +203,7 @@ class Const(object):
     def __init__(self, val):
         self.val = val
 
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
         pass
 
@@ -205,6 +215,63 @@ class Expr(object):
         self.op = op
         self.vals = vals
 
-    def __str__():
+    def __str__(self):
         # TODO: convert the tree to a string
         pass
+
+class Expression:
+    pass
+
+class NumberExpression(Expression):
+    pass
+
+class BooleanExpression(Expression):
+    pass
+
+class StringExpression(Expression):
+    pass
+
+class BinaryExpression(NumberExpression):
+    def __init__(self, left, op, right):
+        self.left = left
+        self.op = op
+        self.right = right
+
+    def __str__(self):
+        return "%s %s %s" % (self.left, self.op, self.right)
+
+class UnaryExpression(NumberExpression):
+    # +Right or -Right
+    def __init__(self, op, right):
+        self.op = op
+        self.right = right
+
+    def __str__(self):
+        return "%s%s" % (self.op, self.right)
+
+class MathExpression(NumberExpression):
+    # COS(3) or MOD(5, 3)
+    def __init__(self, op, *args):
+        self.op = op
+        self.args = args
+
+    def __str__(self):
+        arg_str = ", ".join(map(str, self.args))
+        return "%s(%s)" % (self.op, arg_str)
+
+class ParenthesizedExpression(NumberExpression):
+    def __init__(self, exp):
+        self.exp = exp
+
+    def __str__(self):
+        return  "(%s)" % (self.exp)
+
+class ComparisonExpression(BooleanExpression):
+    # C1 > 5
+    def __init__(self, left, op, right):
+        self.left = left
+        self.right = right
+        self.op = op
+
+    def __str__(self):
+        return "%s %s %s" % (self.left, self.op, self.right)

@@ -1,0 +1,25 @@
+Some stuff that I wanted to save...
+
+function_operators = ['POWER(n, n)', 'ABS(n)', 'MOD(n, n)', 'SQRT(n)', 'LN(n)',
+                      'LOG10(n)', 'EXP(n)', 'CEIL(n)', 'FLOOR(n)', 'RAND()',
+                      'RAND_INTEGER(n)', 'ACOS(n)', 'ASIN(n)', 'ATAN(n)',
+                      'ATAN2(n, n)', 'COS(n)', 'COT(n)', 'DEGREES(n)', 'RADIANS(n)',
+                      'ROUND(n)', 'ROUND(n, n)', 'SIGN(n)', 'SIN(n)', 'TAN(n)',
+                      'TRUNCATE(n)', 'TRUNCATE(n, n)', 'PI()']
+
+# Potential SQL types
+# n = length
+# p = precision
+# s = scale
+# Array, Multiset, XML, INTERVAL, VARBINARY not supported on SQLfiddle...
+types = ['CHARACTER(n)', 'VARCHAR(n)', 'BINARY(n)',
+         'BOOLEAN', 'SMALLINT', 'INTEGER', 'BIGINT', 'DECIMAL(p, s)',
+         'NUMERIC(p, s)', 'FLOAT(p)', 'REAL', 'FLOAT', 'DOUBLE PRECISION',
+         'DATE', 'TIME', 'TIMESTAMP']
+
+logical_operators = ['OR', 'AND', 'NOT', 'IS FALSE', 'IS NOT FALSE']
+string_operators = ['n || n', 'CHAR_LENGTH(n)', 'CHARACTER_LENGTH(n)', 'UPPER(n)',
+                    'LOWER(n)', 'POSITION(n IN n)', 'TRIM']
+# Numeric types for numeric expressions...
+numeric_types = ['SMALLINT', 'INTEGER', 'BIGINT', 'NUMERIC(p, s)', 'DECIMAL(p, s)',
+                 'FLOAT(p)', 'REAL', 'DOUBLE PRECISION']
