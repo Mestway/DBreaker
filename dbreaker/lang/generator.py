@@ -37,10 +37,9 @@ def sample_expression(tableSchema, ty):
 
 def sample_boolean_expression(tableSchema):
     # Try number vs. number
-    left = sample_num_expression(tableSchema)
-    right =  sample_num_expression(tableSchema)
-
-    if left is not None:
+    if len(get_num_columns(tableSchema)) > 0:
+        left = sample_num_expression(tableSchema)
+        right =  sample_num_expression(tableSchema)
         op = random.choice(comparison_operators)
         return ComparisonExpression(left, op, right)
     else:
@@ -132,6 +131,13 @@ def sample_name(N):
 def sample_table_constraint(tableSchema):
     constraints = ['CHECK', 'PRIMARY KEY', 'UNIQUE']
     name = sample_name(5) if random.random() < 0.5 else ""
+
+    # There can only be one primary key at a time
+    for constraint in tableSchema.tbl_constraints:
+        if 'PRIMARY KEY' in constraints:
+            constraints.remove('PRIMARY KEY')
+
+    print (tableSchema.tbl_constraints)
     constraint = random.choice(constraints)
     if (constraint == 'CHECK'):
         exp = sample_boolean_expression(tableSchema)
@@ -213,7 +219,7 @@ selects = int(input())
 
 schemas = sample_schema(tables, columns)
 for index, schema in enumerate(schemas):
-    file = open("output/file" + str(index + 1) + ".sql","w+")
+    file = open("output/query" + str(index + 1) + ".sql","w+")
     file.write(str(schema));
     file.write('\n\n')
     for i in range(0, selects):
