@@ -1,5 +1,7 @@
 ## Project Structure
 
+* `calcite_interface/`: (java) code for running calcite on top of mysql.
+* `dbreaker-py/`: (python) code for sampling and mutating SQL queries.
 
 ## Docker Setup
 
