@@ -103,4 +103,5 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-*.idea/
+calcite_interface/.idea/
+calcite_interface/*.iml
