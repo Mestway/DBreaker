@@ -5,8 +5,8 @@ DATABASE="test_db"
 USER="dbtest"
 PASSWORD="dbtest"
 
-DDL_FILE="calcite_interface/example/example.ddl.sql"
-SQL_FILE="calcite_interface/example/example.sql"
+DDL_FILE="example/example.ddl.sql"
+SQL_FILE="example/example.sql"
 OUTPUT_CMD=""
 
 echo $#

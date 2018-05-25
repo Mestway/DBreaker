@@ -14,9 +14,9 @@ to initialize the database and the connector.
 
 To test queries, run
 
-`./exec_sql.sh [DDL_FILE.ddl.sql] [SQL_FILE.sql] [OUTPUT_FILE]`
+`./run_sql.sh [DDL_FILE.ddl.sql] [SQL_FILE.sql] [OUTPUT_FILE]`
 
-Examples of DDL_FILE.ddl.sql and SQL_FILE.sql can be found in [calcite_interface/example](https://github.com/Mestway/dbreaker/tree/master/calcite_interface/example).
+Examples of DDL_FILE.ddl.sql and SQL_FILE.sql can be found in [calcite_interface/example](https://github.com/Mestway/dbreaker/tree/master/example).
 
 ## Python Setup
 
