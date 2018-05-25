@@ -1,3 +1,6 @@
+## Project Structure
+
+
 ## Docker Setup
 
 The docker is the environment for testing queries. If you don't have docker, you can install them following https://docs.docker.com/install/ To build the docker:
