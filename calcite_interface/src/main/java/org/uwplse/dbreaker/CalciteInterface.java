@@ -1,17 +1,8 @@
-package edu.uwplse.dbreaker;
+package org.uwplse.dbreaker;
 
-import java.io.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.*;
-
+import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
-
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 import org.apache.calcite.adapter.jdbc.JdbcSchema;
@@ -19,15 +10,26 @@ import org.apache.calcite.jdbc.CalciteConnection;
 import org.apache.calcite.schema.Schema;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.commons.dbcp.BasicDataSource;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
-import org.json.*;
+import javax.sql.DataSource;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.Scanner;
+
 
 /**
  * Created by clwang on 5/25/18.
  */
 public class CalciteInterface {
     // JDBC driver name and database URL
-    static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
 
     public static List<String> simpleScriptParser(String content) {
         List<String> result = new ArrayList<String>();
@@ -66,18 +68,26 @@ public class CalciteInterface {
         Namespace arguments = parser.parseArgs(args);
 
         //  Database information and credentials
-        final String DB_URL = "jdbc:mysql://localhost/" + arguments.get("database");
+        final String DB_NAME = arguments.get("database");
+        //final String DB_URL = "jdbc:mysql://localhost:3306/" + DB_NAME;
         final String USER = arguments.get("user");
         final String PASS = arguments.get("password");
         final String ddlFile = arguments.get("ddl");
         final String queryFile = arguments.get("query");
         final String outputFile = arguments.get("output_file");
 
-        System.out.println(DB_URL + " " + USER + " " + PASS + " " + ddlFile + " " + queryFile);
+        System.out.println(DB_NAME + " " + USER + " " + PASS + " " + ddlFile + " " + queryFile);
 
         List<String> ddlCommands = simpleScriptParser(String.join(" ", readFileContent(ddlFile)));
 
-        Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+        MysqlDataSource mysqlDataSource = new MysqlDataSource();
+        mysqlDataSource.setUser(USER);
+        mysqlDataSource.setPassword(PASS);
+        mysqlDataSource.setServerName("localhost");
+        mysqlDataSource.setDatabaseName(DB_NAME);
+        mysqlDataSource.setUseSSL(false);
+
+        Connection conn = mysqlDataSource.getConnection();
         Statement ddlStatement = conn.createStatement();
         // execute ddl
         for (String q : ddlCommands)
@@ -87,8 +97,6 @@ public class CalciteInterface {
 
         List<String> queries = simpleScriptParser(String.join(" ", readFileContent(queryFile)));
 
-        Class.forName("org.apache.calcite.jdbc.Driver");
-
         Properties info = new Properties();
         info.setProperty("lex", "JAVA");
         Connection connection = DriverManager.getConnection("jdbc:calcite:", info);
@@ -96,13 +104,13 @@ public class CalciteInterface {
         SchemaPlus rootSchema = calciteConnection.getRootSchema();
 
         // create schema
-        Class.forName(JDBC_DRIVER);
-        BasicDataSource dataSource = new BasicDataSource();
-        dataSource.setUrl(DB_URL);
-        dataSource.setUsername(USER);
-        dataSource.setPassword(PASS);
-        Schema schema = JdbcSchema.create(rootSchema, "test_db",
-                dataSource, null, "test_db");
+        MysqlDataSource calciteDataSource = new MysqlDataSource();
+        calciteDataSource.setServerName("localhost");
+        calciteDataSource.setUser(USER);
+        calciteDataSource.setPassword(PASS);
+        calciteDataSource.setDatabaseName(DB_NAME);
+        calciteDataSource.setUseSSL(false);
+        Schema schema = JdbcSchema.create(rootSchema, "test_db", calciteDataSource, null, "test_db");
 
         rootSchema.add("test_db", schema);
         Statement statement = calciteConnection.createStatement();
@@ -122,6 +130,7 @@ public class CalciteInterface {
 
         statement.close();
         connection.close();
+
     }
 
     private static String resultToJsonStr(ResultSet resultSet) throws SQLException {
