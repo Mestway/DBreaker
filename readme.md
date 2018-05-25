@@ -3,6 +3,7 @@
 The docker is the environment for testing queries. If you don't have docker, you can install them following https://docs.docker.com/install/ To build the docker:
 
 `docker build -t dbtest .`
+
 `docker run -it dbtest`
 
 Once you are inside the docker, you can run:
