@@ -229,10 +229,7 @@ for index, schema in enumerate(schemas):
     file.close();    
 
 def sample_select():
-
-	
-
 	pass
 
 def sample_proj_items(n):
-
+    pass
