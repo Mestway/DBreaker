@@ -207,29 +207,3 @@ def sample_select(tableSchema):
     table_expr = tableSchema.name # for now... could have to use some alias stuff later on
     where_pred = sample_boolean_expression(tableSchema)
     return Select(option, proj_items, table_expr, where_pred, None, None, None)
-
-
-# Generation code (in output files)
-print("How many tables do you want?");
-tables = int(input())
-print("How many columns in the tables?");
-columns = int(input())
-print("How many select statements per table?");
-selects = int(input())
-
-schemas = sample_schema(tables, columns)
-for index, schema in enumerate(schemas):
-    file = open("output/query" + str(index + 1) + ".sql","w+")
-    file.write(str(schema));
-    file.write('\n\n')
-    for i in range(0, selects):
-        select = sample_select(schema)
-        file.write(str(select))
-        file.write('\n\n')
-    file.close();    
-
-def sample_select():
-	pass
-
-def sample_proj_items(n):
-    pass
