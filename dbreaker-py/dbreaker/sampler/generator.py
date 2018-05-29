@@ -62,11 +62,11 @@ def get_num_columns(tableSchema):
                      'FLOAT(p)', 'REAL', 'DOUBLE PRECISION']
     return get_columns(tableSchema, numeric_types)
 
-def get_string_columns(tableSchema):
+def get_boolean_columns(tableSchema):
     boolean_types = ['BOOLEAN']
     return get_columns(tableSchema, boolean_types)
 
-def get_boolean_columns(tableSchema):
+def get_string_columns(tableSchema):
     string_types = ['VARCHAR(n)', 'CHARACTER(n)']
     return get_columns(tableSchema, string_types)
 
@@ -84,14 +84,10 @@ def number_expression(cols, max_depth, tableName):
     # Choose a random column
     c = random.choice(cols)
 
-    if p < 0.25 or max_depth == 0:
+    if p < 0.33 or max_depth == 0:
         # Return a number (include randomly generated numbers)
         return random.choice([random.randint(0, 10), tableName + "." + c.name])
-    elif p < 0.50:
-        # Return a parenthesis
-        n = number_expression(cols, max_depth - 1, tableName)
-        return ParenthesizedExpression(n)
-    elif p < 0.75:
+    elif p < 0.67:
         # Return a function expression
         f = random.choice(function_operators)
         args = f[f.find("(") + 1 : f.find(")")].count("n")
