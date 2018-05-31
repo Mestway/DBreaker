@@ -223,7 +223,7 @@ class Expression:
     pass
 
 class BinaryExpression(Expression):
-    def __init__(self, left, op, right):
+    def __init__(self, op, left, right):
         self.left = left
         self.op = op
         self.right = right
@@ -233,14 +233,14 @@ class BinaryExpression(Expression):
 
 class UnaryExpression(Expression):
     # +Right or -Right
-    def __init__(self, op, right):
+    def __init__(self, op, left, right):
         self.op = op
         self.right = right
 
     def __str__(self):
         return "%s%s" % (self.op, self.right)
 
-class MathExpression(Expression):
+class FunctionExpression(Expression):
     # COS(3) or MOD(5, 3)
     def __init__(self, op, *args):
         self.op = op
@@ -249,13 +249,3 @@ class MathExpression(Expression):
     def __str__(self):
         arg_str = ", ".join(map(str, self.args))
         return "%s(%s)" % (self.op, arg_str)
-
-class ComparisonExpression(Expression):
-    # C1 > 5
-    def __init__(self, left, op, right):
-        self.left = left
-        self.right = right
-        self.op = op
-
-    def __str__(self):
-        return "%s %s %s" % (self.left, self.op, self.right)
