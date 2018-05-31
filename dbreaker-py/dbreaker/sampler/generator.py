@@ -14,41 +14,123 @@ import string
 #          'DATE', 'TIME', 'TIMESTAMP']
 types = ['BOOLEAN', 'VARCHAR(n)', 'CHARACTER(n)', 'INTEGER', 'DECIMAL(p, s)']
 
-# OPERATORS
-math_operators = ['+', '-', '*', '/', '%']
+operators = [
+    # Number Operators
+    {'op': '+' , 'input': ['NUMBER', 'NUMBER'], 'output': 'NUMBER', 'type': BinaryExpression },
+    {'op': '-' , 'input': ['NUMBER', 'NUMBER'], 'output': 'NUMBER', 'type': BinaryExpression },
+    {'op': '*' , 'input': ['NUMBER', 'NUMBER'], 'output': 'NUMBER', 'type': BinaryExpression },
+    {'op': '/' , 'input': ['NUMBER', 'NUMBER'], 'output': 'NUMBER', 'type': BinaryExpression },
+    {'op': '%' , 'input': ['NUMBER', 'NUMBER'], 'output': 'NUMBER', 'type': BinaryExpression },
+    {'op': 'POWER' , 'input': ['NUMBER', 'NUMBER'], 'output': 'NUMBER', 'type': FunctionExpression },
+    {'op': 'ABS' , 'input': ['NUMBER'], 'output': 'NUMBER', 'type': FunctionExpression },
+    {'op': '+' , 'input': ['NUMBER'], 'output': 'NUMBER', 'type': UnaryExpression },
+    {'op': '-' , 'input': ['NUMBER'], 'output': 'NUMBER', 'type': UnaryExpression },
 
-function_operators = ['POWER(n, n)', 'ABS(n)']
+    # String Operators
+    {'op': 'CHAR_LENGTH' , 'input': ['STRING'], 'output': 'NUMBER', 'type': FunctionExpression },
+    {'op': 'UPPER' , 'input': ['STRING'], 'output': 'STRING', 'type': FunctionExpression },
 
-unary_operators = ['-', '+']
+    # Comparison Operators
+    {'op': '=' , 'input': ['NUMBER', 'NUMBER'], 'output': 'BOOLEAN', 'type': BinaryExpression },
+    {'op': '=' , 'input': ['STRING', 'STRING'], 'output': 'BOOLEAN', 'type': BinaryExpression },
+    {'op': '<>' , 'input': ['NUMBER', 'NUMBER'], 'output': 'BOOLEAN', 'type': BinaryExpression },
+    {'op': '!=' , 'input': ['NUMBER', 'NUMBER'], 'output': 'BOOLEAN', 'type': BinaryExpression },
+    {'op': '>' , 'input': ['NUMBER', 'NUMBER'], 'output': 'BOOLEAN', 'type': BinaryExpression },
+    {'op': '>=' , 'input': ['NUMBER', 'NUMBER'], 'output': 'BOOLEAN', 'type': BinaryExpression },
+    {'op': '<' , 'input': ['NUMBER', 'NUMBER'], 'output': 'BOOLEAN', 'type': BinaryExpression },
+    {'op': '<=' , 'input': ['NUMBER', 'NUMBER'], 'output': 'BOOLEAN', 'type': BinaryExpression },
+    {'op': 'OR' , 'input': ['BOOLEAN', 'BOOLEAN'], 'output': 'BOOLEAN', 'type': BinaryExpression },
+    {'op': 'AND' , 'input': ['BOOLEAN', 'BOOLEAN'], 'output': 'BOOLEAN', 'type': BinaryExpression },
+]
 
-comparison_operators = ['=', '<>', '!=', '>', '>=', '<', '<=']
-
-logical_operators = ['OR', 'AND']
-
-string_operators = ['CHAR_LENGTH(n)', 'UPPER(n)']
 # Numeric types for numeric expressions...
+def filter_operators(tableSchema, output):
+    col_types = {
+        'NUMBER': get_num_columns(tableSchema),
+        'BOOLEAN': get_boolean_columns(tableSchema),
+        'STRING': get_string_columns(tableSchema)
+    }
+    available = []
+    for key, value in col_types.items():
+        if len(value) > 0:
+            available.append(key)
 
-def sample_expression(tableSchema, ty):
+    # Filter by output
+    tmp = list(filter(lambda operator: operator['output'] == output, operators))
+    # Filter by input, make sure our tableSchema contains columns that can
+    # go into these expressions
+    result = []
+    for v in tmp:
+        ok = True
+        for i in v['input']:
+            if i not in available:
+                ok = False
+                break
+        if ok:
+            result.append(v)
+    return result
+
+def sample_expression(tableSchema, ty, depth):
     # Based on the type we want generate that thing...
     if ty == 'BOOLEAN':
-        return sample_boolean_expression(tableSchema)
+        return sample_boolean_expression(tableSchema, depth)
     elif ty == 'NUMBER':
-        return sample_num_expression(tableSchema)
+        return sample_num_expression(tableSchema, depth)
+    elif ty == 'STRING':
+        return sample_string_expression(tableSchema, depth)
 
-def sample_boolean_expression(tableSchema):
-    # Try number vs. number
-    if len(get_num_columns(tableSchema)) > 0:
-        left = sample_num_expression(tableSchema)
-        right =  sample_num_expression(tableSchema)
-        op = random.choice(comparison_operators)
-        return ComparisonExpression(left, op, right)
+def sample_num_expression(tableSchema, depth):
+    if depth == 0:
+        # Return a number (include randomly generated numbers)
+        num_columns = get_num_columns(tableSchema)
+        if (len(num_columns) == 0):
+            return None
+        else:
+            c = random.choice(num_columns)
+            return random.choice([random.randint(0, 10), tableSchema.name + "." + c.name])
     else:
-        vals = ['NULL']
-        boolean_compare = ['!=', '=']
-        col = tableSchema.name + "." + random.choice(tableSchema.columns).name
-        return ComparisonExpression(col, random.choice(boolean_compare), random.choice(vals))
+        number_operators = filter_operators(tableSchema, 'NUMBER')
+        op = random.choice(number_operators)
+        params = []
+        for p in op["input"]:
+           params.append(sample_expression(tableSchema, p, depth - 1))
+        result = op["type"](op['op'], *params)
+        return result
 
-# Helper function for grabbing columns of a certain type
+def sample_string_expression(tableSchema, depth):
+    if (depth == 0):
+        # Return a string field...
+        string_columns = get_string_columns(tableSchema)
+        if (len(string_columns) == 0):
+            return None
+        else:
+            return tableSchema.name + "." + random.choice(string_columns).name
+
+    string_operators = filter_operators(tableSchema, 'STRING')
+    op = random.choice(string_operators)
+    params = []
+    for p in op["input"]:
+       params.append(sample_expression(tableSchema, p, depth - 1))
+    result = op["type"](op['op'], *params)
+    return result
+
+def sample_boolean_expression(tableSchema, depth):
+    if (depth == 0):
+        # Return a boolean field...
+        boolean_columns = get_boolean_columns(tableSchema)
+        if (len(boolean_columns) == 0):
+            return None
+        else:
+            return tableSchema.name + "." + random.choice(boolean_columns).name
+
+    boolean_operators = filter_operators(tableSchema, 'BOOLEAN')
+    op = random.choice(boolean_operators)
+    params = []
+    for p in op["input"]:
+       params.append(sample_expression(tableSchema, p, depth - 1))
+    result = op["type"](op['op'], *params)
+    return result
+
 def get_columns(tableSchema, types):
     columns = []
     for col in tableSchema.columns:
@@ -69,40 +151,6 @@ def get_boolean_columns(tableSchema):
 def get_string_columns(tableSchema):
     string_types = ['VARCHAR(n)', 'CHARACTER(n)']
     return get_columns(tableSchema, string_types)
-
-def sample_num_expression(tableSchema):
-    num_columns = get_num_columns(tableSchema)
-    if (len(num_columns) == 0):
-        # We can't do a number_expression... TODO: Figure out what to do here
-        return None
-    else:
-        return number_expression(num_columns, 2, tableSchema.name)
-
-def number_expression(cols, max_depth, tableName):
-    # Return a boolean expression
-    p = random.random()
-    # Choose a random column
-    c = random.choice(cols)
-
-    if p < 0.33 or max_depth == 0:
-        # Return a number (include randomly generated numbers)
-        return random.choice([random.randint(0, 10), tableName + "." + c.name])
-    elif p < 0.67:
-        # Return a function expression
-        f = random.choice(function_operators)
-        args = f[f.find("(") + 1 : f.find(")")].count("n")
-        op = f[:f.find("(")]
-        number_args = []
-        for i in range(0, args):
-            number_args.append(number_expression(cols, max_depth - 1, tableName))
-        return MathExpression(op, *number_args)
-    else: 
-        # Return an operation...
-        left = number_expression(cols, max_depth - 1, tableName)
-        right = number_expression(cols, max_depth - 1, tableName)
-        op = random.choice(math_operators)
-        return BinaryExpression(left, op, right)
-
 
 # CREATE TABLE
 def sample_schema(num_tables, num_columns):
@@ -133,10 +181,9 @@ def sample_table_constraint(tableSchema):
         if 'PRIMARY KEY' in constraints:
             constraints.remove('PRIMARY KEY')
 
-    print (tableSchema.tbl_constraints)
     constraint = random.choice(constraints)
     if (constraint == 'CHECK'):
-        exp = sample_boolean_expression(tableSchema)
+        exp = sample_boolean_expression(tableSchema, 1)
         return TableConstraint(constraint, exp, [], name)
     else:
         cols = [col.name for col in tableSchema.columns]
@@ -201,5 +248,5 @@ def sample_select(tableSchema):
         option = random.choice(options)
     proj_items = sample_projection(tableSchema)
     table_expr = tableSchema.name # for now... could have to use some alias stuff later on
-    where_pred = sample_boolean_expression(tableSchema)
+    where_pred = sample_boolean_expression(tableSchema, 3)
     return Select(option, proj_items, table_expr, where_pred, None, None, None)
