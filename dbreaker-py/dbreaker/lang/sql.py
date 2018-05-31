@@ -233,7 +233,7 @@ class BinaryExpression(Expression):
 
 class UnaryExpression(Expression):
     # +Right or -Right
-    def __init__(self, op, left, right):
+    def __init__(self, op, right):
         self.op = op
         self.right = right
 

@@ -59,19 +59,64 @@ operators = [
 # Numeric types for numeric expressions...
 # print (list(filter(lambda person: person['output'] == 'BOOLEAN', operators)))
 
-def sample_expression(tableSchema, ty):
+def sample_expression(tableSchema, ty, depth):
     # Based on the type we want generate that thing...
     if ty == 'BOOLEAN':
-        return sample_boolean_expression(tableSchema)
+        return sample_boolean_expression(tableSchema, depth)
     elif ty == 'NUMBER':
-        return sample_num_expression(tableSchema)
+        return sample_num_expression(tableSchema, depth)
+    elif ty == 'STRING':
+        return sample_string_expression(tableSchema, depth)
 
-def sample_boolean_expression(tableSchema):
+def sample_num_expression(tableSchema, depth):
+    if depth == 0:
+        # Return a number (include randomly generated numbers)
+        num_columns = get_num_columns(tableSchema)
+        if (len(num_columns) == 0):
+            return None
+        else:
+            c = random.choice(num_columns)
+            return random.choice([random.randint(0, 10), tableSchema.name + "." + c.name])
+    else:
+        number_operators = list(filter(lambda person: person['output'] == 'NUMBER', operators))
+        op = random.choice(number_operators)
+        params = []
+        for p in op["input"]:
+           params.append(sample_expression(tableSchema, p, depth - 1))
+        result = op["type"](op['op'], *params)
+        return result
+
+def sample_string_expression(tableSchema, depth):
+    if (depth == 0):
+        # Return a string field...
+        string_columns = get_string_columns(tableSchema)
+        if (len(string_columns) == 0):
+            return None
+        else:
+            return tableSchema.name + "." + random.choice(string_columns).name
+
+    string_operators = list(filter(lambda person: person['output'] == 'STRING', operators))
+    op = random.choice(string_operators)
+    params = []
+    for p in op["input"]:
+       params.append(sample_expression(tableSchema, p, depth - 1))
+    result = op["type"](op['op'], *params)
+    return result
+
+def sample_boolean_expression(tableSchema, depth):
+    if (depth == 0):
+        # Return a boolean field...
+        boolean_columns = get_boolean_columns(tableSchema)
+        if (len(boolean_columns) == 0):
+            return None
+        else:
+            return tableSchema.name + "." + random.choice(boolean_columns).name
+
     boolean_operators = list(filter(lambda person: person['output'] == 'BOOLEAN', operators))
     op = random.choice(boolean_operators)
     params = []
     for p in op["input"]:
-       params.append(sample_expression(tableSchema, p))
+       params.append(sample_expression(tableSchema, p, depth - 1))
     result = op["type"](op['op'], *params)
     return result
 
@@ -96,40 +141,6 @@ def get_boolean_columns(tableSchema):
 def get_string_columns(tableSchema):
     string_types = ['VARCHAR(n)', 'CHARACTER(n)']
     return get_columns(tableSchema, string_types)
-
-def sample_num_expression(tableSchema):
-    num_columns = get_num_columns(tableSchema)
-    if (len(num_columns) == 0):
-        # We can't do a number_expression... TODO: Figure out what to do here
-        return random.randint(0, 10)
-    else:
-        return number_expression(num_columns, 2, tableSchema.name)
-
-def number_expression(cols, max_depth, tableName):
-    # Return a boolean expression
-    p = random.random()
-    # Choose a random column
-    c = random.choice(cols)
-
-    if p < 0.33 or max_depth == 0:
-        # Return a number (include randomly generated numbers)
-        return random.choice([random.randint(0, 10), tableName + "." + c.name])
-    elif p < 0.67:
-        # Return a function expression
-        f = random.choice(function_operators)
-        args = f[f.find("(") + 1 : f.find(")")].count("n")
-        op = f[:f.find("(")]
-        number_args = []
-        for i in range(0, args):
-            number_args.append(number_expression(cols, max_depth - 1, tableName))
-        return FunctionExpression(op, *number_args)
-    else: 
-        # Return an operation...
-        left = number_expression(cols, max_depth - 1, tableName)
-        right = number_expression(cols, max_depth - 1, tableName)
-        op = random.choice(math_operators)
-        return BinaryExpression(op, left, right)
-
 
 # CREATE TABLE
 def sample_schema(num_tables, num_columns):
@@ -162,7 +173,7 @@ def sample_table_constraint(tableSchema):
 
     constraint = random.choice(constraints)
     if (constraint == 'CHECK'):
-        exp = sample_boolean_expression(tableSchema)
+        exp = sample_boolean_expression(tableSchema, 1)
         return TableConstraint(constraint, exp, [], name)
     else:
         cols = [col.name for col in tableSchema.columns]
@@ -227,5 +238,5 @@ def sample_select(tableSchema):
         option = random.choice(options)
     proj_items = sample_projection(tableSchema)
     table_expr = tableSchema.name # for now... could have to use some alias stuff later on
-    where_pred = sample_boolean_expression(tableSchema)
+    where_pred = sample_boolean_expression(tableSchema, 3)
     return Select(option, proj_items, table_expr, where_pred, None, None, None)
