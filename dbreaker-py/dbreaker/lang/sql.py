@@ -238,7 +238,7 @@ class UnaryExpression(Expression):
         self.right = right
 
     def __str__(self):
-        return "%s%s" % (self.op, self.right)
+        return "(%s%s)" % (self.op, self.right)
 
 class FunctionExpression(Expression):
     # COS(3) or MOD(5, 3)

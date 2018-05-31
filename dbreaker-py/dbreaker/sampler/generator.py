@@ -14,19 +14,6 @@ import string
 #          'DATE', 'TIME', 'TIMESTAMP']
 types = ['BOOLEAN', 'VARCHAR(n)', 'CHARACTER(n)', 'INTEGER', 'DECIMAL(p, s)']
 
-# OPERATORS
-math_operators = ['+', '-', '*', '/', '%']
-
-function_operators = ['POWER(n, n)', 'ABS(n)']
-
-unary_operators = ['-', '+']
-
-comparison_operators = ['=', '<>', '!=', '>', '>=', '<', '<=']
-
-logical_operators = ['OR', 'AND']
-
-string_operators = ['CHAR_LENGTH(n)', 'UPPER(n)']
-
 operators = [
     # Number Operators
     {'op': '+' , 'input': ['NUMBER', 'NUMBER'], 'output': 'NUMBER', 'type': BinaryExpression },
@@ -57,7 +44,31 @@ operators = [
 ]
 
 # Numeric types for numeric expressions...
-# print (list(filter(lambda person: person['output'] == 'BOOLEAN', operators)))
+def filter_operators(tableSchema, output):
+    col_types = {
+        'NUMBER': get_num_columns(tableSchema),
+        'BOOLEAN': get_boolean_columns(tableSchema),
+        'STRING': get_string_columns(tableSchema)
+    }
+    available = []
+    for key, value in col_types.items():
+        if len(value) > 0:
+            available.append(key)
+
+    # Filter by output
+    tmp = list(filter(lambda operator: operator['output'] == output, operators))
+    # Filter by input, make sure our tableSchema contains columns that can
+    # go into these expressions
+    result = []
+    for v in tmp:
+        ok = True
+        for i in v['input']:
+            if i not in available:
+                ok = False
+                break
+        if ok:
+            result.append(v)
+    return result
 
 def sample_expression(tableSchema, ty, depth):
     # Based on the type we want generate that thing...
@@ -78,7 +89,7 @@ def sample_num_expression(tableSchema, depth):
             c = random.choice(num_columns)
             return random.choice([random.randint(0, 10), tableSchema.name + "." + c.name])
     else:
-        number_operators = list(filter(lambda person: person['output'] == 'NUMBER', operators))
+        number_operators = filter_operators(tableSchema, 'NUMBER')
         op = random.choice(number_operators)
         params = []
         for p in op["input"]:
@@ -95,7 +106,7 @@ def sample_string_expression(tableSchema, depth):
         else:
             return tableSchema.name + "." + random.choice(string_columns).name
 
-    string_operators = list(filter(lambda person: person['output'] == 'STRING', operators))
+    string_operators = filter_operators(tableSchema, 'STRING')
     op = random.choice(string_operators)
     params = []
     for p in op["input"]:
@@ -112,7 +123,7 @@ def sample_boolean_expression(tableSchema, depth):
         else:
             return tableSchema.name + "." + random.choice(boolean_columns).name
 
-    boolean_operators = list(filter(lambda person: person['output'] == 'BOOLEAN', operators))
+    boolean_operators = filter_operators(tableSchema, 'BOOLEAN')
     op = random.choice(boolean_operators)
     params = []
     for p in op["input"]:
@@ -120,7 +131,6 @@ def sample_boolean_expression(tableSchema, depth):
     result = op["type"](op['op'], *params)
     return result
 
-# Helper function for grabbing columns of a certain type
 def get_columns(tableSchema, types):
     columns = []
     for col in tableSchema.columns:
