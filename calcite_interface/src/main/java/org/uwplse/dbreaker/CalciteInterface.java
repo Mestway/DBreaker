@@ -32,6 +32,7 @@ public class CalciteInterface {
     // JDBC driver name and database URL
 
     public static List<String> simpleScriptParser(String content) {
+        content = content.trim();
         List<String> result = new ArrayList<String>();
         String[] statements = content.split(";");
         for (String s : statements) {
@@ -86,6 +87,7 @@ public class CalciteInterface {
             }
             if (s.startsWith("---------- [Queries]"))
                 ddlMode = false;
+
             if (ddlMode) {
                 ddlContent.add(s);
             } else {
@@ -94,6 +96,10 @@ public class CalciteInterface {
         }
 
         List<String> ddlCommands = simpleScriptParser(String.join(" ", ddlContent));
+        System.out.println(String.join("\n===", ddlCommands));
+
+        List<String> queries = simpleScriptParser(String.join(" ", queryContent));
+        System.out.println(String.join("\n===", queries));
 
         MysqlDataSource mysqlDataSource = new MysqlDataSource();
         mysqlDataSource.setUser(USER);
@@ -110,7 +116,7 @@ public class CalciteInterface {
         ddlStatement.executeBatch();
         conn.close();
 
-        List<String> queries = simpleScriptParser(String.join(" ", queryContent));
+
 
         Properties info = new Properties();
         info.setProperty("lex", "JAVA");
