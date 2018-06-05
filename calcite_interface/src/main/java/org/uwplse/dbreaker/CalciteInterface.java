@@ -84,10 +84,12 @@ public class CalciteInterface {
         for (String s : readFileContent(inputFile)) {
             if (s.startsWith("---------- [DDL]")) {
                 ddlMode = true;
+                continue;
             }
-            if (s.startsWith("---------- [Queries]"))
+            if (s.startsWith("---------- [Queries]")) {
                 ddlMode = false;
-
+                continue;
+            }
             if (ddlMode) {
                 ddlContent.add(s);
             } else {
