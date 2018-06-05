@@ -96,10 +96,7 @@ public class CalciteInterface {
         }
 
         List<String> ddlCommands = simpleScriptParser(String.join(" ", ddlContent));
-        System.out.println(String.join("\n===", ddlCommands));
-
         List<String> queries = simpleScriptParser(String.join(" ", queryContent));
-        System.out.println(String.join("\n===", queries));
 
         MysqlDataSource mysqlDataSource = new MysqlDataSource();
         mysqlDataSource.setUser(USER);
@@ -112,10 +109,8 @@ public class CalciteInterface {
         Statement ddlStatement = conn.createStatement();
         // execute ddl
         for (String q : ddlCommands) {
-            System.out.println(q);
-            ddlStatement.addBatch(q);
+            ddlStatement.execute(q);
         }
-        ddlStatement.executeBatch();
         conn.close();
 
 
