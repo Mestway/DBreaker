@@ -61,8 +61,7 @@ public class CalciteInterface {
         parser.addArgument("--database").metavar("DATABASE").setDefault("test_db");
         parser.addArgument("--user").metavar("USERNAME").setDefault("dbtest");
         parser.addArgument("--password").metavar("PASSWORD").setDefault("dbtest");
-        parser.addArgument("--ddl").metavar("DDL_FILE");
-        parser.addArgument("--query").metavar("QUERY_FILE");
+        parser.addArgument("--input-file").metavar("INPUT_FILE");
         parser.addArgument("--output-file").metavar("OUTPUT_FILE");
 
         Namespace arguments = parser.parseArgs(args);
@@ -72,13 +71,29 @@ public class CalciteInterface {
         //final String DB_URL = "jdbc:mysql://localhost:3306/" + DB_NAME;
         final String USER = arguments.get("user");
         final String PASS = arguments.get("password");
-        final String ddlFile = arguments.get("ddl");
-        final String queryFile = arguments.get("query");
+        final String inputFile = arguments.get("input_file");
         final String outputFile = arguments.get("output_file");
 
-        System.out.println(DB_NAME + " " + USER + " " + PASS + " " + ddlFile + " " + queryFile);
+        System.out.println(DB_NAME + " " + USER + " " + PASS + " " + inputFile);
 
-        List<String> ddlCommands = simpleScriptParser(String.join(" ", readFileContent(ddlFile)));
+        List<String> ddlContent = new ArrayList<>();
+        List<String> queryContent = new ArrayList<>();
+
+        boolean ddlMode = true;
+        for (String s : readFileContent(inputFile)) {
+            if (s.startsWith("---------- [DDL]")) {
+                ddlMode = true;
+            }
+            if (s.startsWith("---------- [Queries]"))
+                ddlMode = false;
+            if (ddlMode) {
+                ddlContent.add(s);
+            } else {
+                queryContent.add(s);
+            }
+        }
+
+        List<String> ddlCommands = simpleScriptParser(String.join(" ", ddlContent));
 
         MysqlDataSource mysqlDataSource = new MysqlDataSource();
         mysqlDataSource.setUser(USER);
@@ -95,7 +110,7 @@ public class CalciteInterface {
         ddlStatement.executeBatch();
         conn.close();
 
-        List<String> queries = simpleScriptParser(String.join(" ", readFileContent(queryFile)));
+        List<String> queries = simpleScriptParser(String.join(" ", queryContent));
 
         Properties info = new Properties();
         info.setProperty("lex", "JAVA");
