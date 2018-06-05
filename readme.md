@@ -35,6 +35,13 @@ Install dbreaker in editable mode
 
 `pip install -e .`
 
+## Run Generator
+
+`python3 main.py --tables 5 --columns 5 --selects 5`
+
+This command generates 5 seperate query files each containing a create table statement
+of a table with 5 columns along with 5 selects to go with it.
+
 ## Related Work
 
 http://vldb.org/conf/2007/papers/industrial/p1243-bati.pdf
