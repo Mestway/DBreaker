@@ -11,8 +11,8 @@ PASSWORD="dbtest"
 # the rootpassword was defined in Dockerfile
 root_password="root"
 
-mysql -uroot --password=$root_password -e "CREATE DATABASE ${MAINDB} /*\!40100 DEFAULT CHARACTER SET utf8 */;"
-mysql -uroot --password=$root_password -e "CREATE USER ${USER}@localhost IDENTIFIED BY '${PASSWORD}';"
+mysql -uroot --password=$root_password -e "CREATE DATABASE IF NOT EXISTS ${MAINDB} /*\!40100 DEFAULT CHARACTER SET utf8 */;"
+mysql -uroot --password=$root_password -e "CREATE USER IF NOT EXISTS ${USER}@localhost IDENTIFIED BY '${PASSWORD}';"
 mysql -uroot --password=$root_password -e "GRANT ALL PRIVILEGES ON ${MAINDB}.* TO '${USER}'@'localhost';"
 mysql -uroot --password=$root_password -e "FLUSH PRIVILEGES;"
 

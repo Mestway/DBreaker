@@ -5,7 +5,7 @@ DATABASE="test_db"
 USER="dbtest"
 PASSWORD="dbtest"
 
-SQL_FILE="example/exampl.sql"
+SQL_FILE="example/example.sql"
 OUTPUT_CMD=""
 
 echo $#
