@@ -111,8 +111,10 @@ public class CalciteInterface {
         Connection conn = mysqlDataSource.getConnection();
         Statement ddlStatement = conn.createStatement();
         // execute ddl
-        for (String q : ddlCommands)
+        for (String q : ddlCommands) {
+            System.out.println(q);
             ddlStatement.addBatch(q);
+        }
         ddlStatement.executeBatch();
         conn.close();
 
