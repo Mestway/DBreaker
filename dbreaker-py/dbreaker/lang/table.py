@@ -1,7 +1,24 @@
 import agate
 
+# Potential SQL types
+# n = length
+# p = precision
+# s = scale
+# Array, Multiset, XML, INTERVAL, VARBINARY not supported on SQLfiddle...
+# types = ['CHARACTER(n)', 'VARCHAR(n)', 'BINARY(n)',
+#          'BOOLEAN', 'SMALLINT', 'INTEGER', 'BIGINT', 'DECIMAL(p, s)',
+#          'NUMERIC(p, s)', 'FLOAT(p)', 'REAL', 'FLOAT', 'DOUBLE PRECISION',
+#          'DATE', 'TIME', 'TIMESTAMP']
 
-class Type(object):
+class ColType(object):
+
+    types = ['BOOLEAN', 'VARCHAR(n)', 'CHARACTER(n)', 'INTEGER', 'DECIMAL(p, s)']
+
+    numeric_types = ['SMALLINT', 'INTEGER', 'BIGINT', 
+                     'NUMERIC(p, s)', 'DECIMAL(p, s)', 
+                     'FLOAT(p)', 'REAL', 'DOUBLE PRECISION']
+    boolean_types = ['BOOLEAN']
+    string_types = ['VARCHAR(n)', 'CHARACTER(n)']
 
     def __init__(self, name, *params):
         self.name = name

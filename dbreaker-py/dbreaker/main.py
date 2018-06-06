@@ -9,10 +9,11 @@ if __name__ == '__main__':
     parser.add_argument('--ntables', '-t', dest='ntables', type=int,
                        help='the number of tables used', default=1)
     parser.add_argument('--ncolumns', '-c', dest='ncolumns', type=int,
-                       help='the number of columns for each table', default=3)
+                       help='the number of columns for each table', default=20)
     parser.add_argument('--nqueries', '-q', dest='nqueries', type=int,
-                       help='the number of select queries for each table', default=5)
-    parser.add_argument('--output-file', '-o', dest="output_file", type=str, help='output file', default=None)
+                       help='the number of select queries for each table', default=10)
+    parser.add_argument('--output-file', '-o', dest="output_file", type=str, 
+                        help='output file', default=None)
 
     args = parser.parse_args()
 
@@ -26,7 +27,7 @@ if __name__ == '__main__':
     f = sys.stdout if output_file is None else open(output_file, "w+")
 
     schemas = sample_schema(ntables, ncolumns)
-    queries = [sample_select(schemas[0])]
+    queries = [sample_select(schemas[0]) for i in range(nqueries)]
 
     f.write('---------- [DDL]\n')
     for schema in schemas:

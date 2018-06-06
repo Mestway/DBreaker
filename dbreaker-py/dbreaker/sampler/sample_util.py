@@ -3,17 +3,6 @@ import random
 from dbreaker.lang.sql import *
 from dbreaker.lang.table import *
 
-# Potential SQL types
-# n = length
-# p = precision
-# s = scale
-# Array, Multiset, XML, INTERVAL, VARBINARY not supported on SQLfiddle...
-# types = ['CHARACTER(n)', 'VARCHAR(n)', 'BINARY(n)',
-#          'BOOLEAN', 'SMALLINT', 'INTEGER', 'BIGINT', 'DECIMAL(p, s)',
-#          'NUMERIC(p, s)', 'FLOAT(p)', 'REAL', 'FLOAT', 'DOUBLE PRECISION',
-#          'DATE', 'TIME', 'TIMESTAMP']
-types = ['BOOLEAN', 'VARCHAR(n)', 'CHARACTER(n)', 'INTEGER', 'DECIMAL(p, s)']
-
 operators = [
     # Number Operators
     {'op': '+' , 'input': ['NUMBER', 'NUMBER'], 'output': 'NUMBER', 'type': BinaryExpr },
@@ -43,25 +32,20 @@ operators = [
     {'op': 'AND' , 'input': ['BOOLEAN', 'BOOLEAN'], 'output': 'BOOLEAN', 'type': BinaryExpr },
 ]
 
-def get_num_columns(tableSchema):
-    numeric_types = ['SMALLINT', 'INTEGER', 'BIGINT', 'NUMERIC(p, s)', 'DECIMAL(p, s)',
-                     'FLOAT(p)', 'REAL', 'DOUBLE PRECISION']
-    return get_columns(tableSchema, numeric_types)
-
-def get_boolean_columns(tableSchema):
-    boolean_types = ['BOOLEAN']
-    return get_columns(tableSchema, boolean_types)
-
-def get_string_columns(tableSchema):
-    string_types = ['VARCHAR(n)', 'CHARACTER(n)']
-    return get_columns(tableSchema, string_types)
+def get_columns_by_type(table_schema, types):
+    columns = []
+    for col in table_schema.columns:
+        matches = [s for s in types if str(col.ty).split("(")[0] in s]
+        if (len(matches) > 0):
+            columns.append(col)
+    return columns
 
 # Numeric types for numeric expressions...
-def filter_operators(tableSchema, output):
+def filter_operators(table_schema, output_type):
     col_types = {
-        'NUMBER': get_num_columns(tableSchema),
-        'BOOLEAN': get_boolean_columns(tableSchema),
-        'STRING': get_string_columns(tableSchema)
+        'NUMBER': get_columns_by_type(table_schema, ColType.numeric_types),
+        'BOOLEAN': get_columns_by_type(table_schema, ColType.boolean_types),
+        'STRING': get_columns_by_type(table_schema, ColType.string_types)
     }
     available = []
     for key, value in col_types.items():
@@ -69,8 +53,8 @@ def filter_operators(tableSchema, output):
             available.append(key)
 
     # Filter by output
-    tmp = list(filter(lambda operator: operator['output'] == output, operators))
-    # Filter by input, make sure our tableSchema contains columns that can
+    tmp = list(filter(lambda operator: operator['output'] == output_type, operators))
+    # Filter by input, make sure our table_schema contains columns that can
     # go into these expressions
     result = []
     for v in tmp:
@@ -89,7 +73,7 @@ def sample_name(N):
 
 # Returns a list of the number of types you want for a table...
 def sample_type():
-    parse = random.choice(types).split('(')
+    parse = random.choice(ColType.types).split('(')
     s_type = parse[0]
     # That means there are parameters we have to consider
     if (len(parse) > 1):
@@ -103,15 +87,8 @@ def sample_type():
             else:
                 # TODO: For now, each type's parameters go from 0 - 30, but that needs to change
                 params.append(random.randint(0, 30))
-        t = Type(s_type, *params)
+        t = ColType(s_type, *params)
     else:
-        t = Type(s_type)
+        t = ColType(s_type)
     return t
 
-def get_columns(tableSchema, types):
-    columns = []
-    for col in tableSchema.columns:
-        matches = [s for s in types if str(col.ty).split("(")[0] in s]
-        if (len(matches) > 0):
-            columns.append(col)
-    return columns
