@@ -1,32 +1,39 @@
 import os, sys
 import argparse
-from dbreaker.sampler.generator import *
+from pprint import pprint
+from dbreaker.sampler.query_sampler import *
+from dbreaker.sampler.table_sampler import *
 
-parser = argparse.ArgumentParser(description='Create some sample DDL and SQL queries')
-parser.add_argument('--tables', '--t', dest='tables', type=int,
-                   help='how many tables you want to produce', default=1)
-parser.add_argument('--columns', '--c', dest='columns', type=int,
-                   help='how many columns per table', default=1)
-parser.add_argument('--selects', '--s', dest='selects', type=int,
-                   help='how many select statements per table', default=1)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Create some sample DDL and SQL queries')
+    parser.add_argument('--ntables', '-t', dest='ntables', type=int,
+                       help='the number of tables used', default=1)
+    parser.add_argument('--ncolumns', '-c', dest='ncolumns', type=int,
+                       help='the number of columns for each table', default=3)
+    parser.add_argument('--nqueries', '-q', dest='nqueries', type=int,
+                       help='the number of select queries for each table', default=5)
+    parser.add_argument('--output-file', '-o', dest="output_file", type=str, help='output file', default=None)
 
-args = parser.parse_args()
+    args = parser.parse_args()
 
-# Generation code (in output files)
-tables = args.tables
-columns = args.columns
-selects = args.selects
+    # Generation code (in output files)
+    ntables = args.ntables
+    ncolumns = args.ncolumns
+    nqueries = args.nqueries
+    output_file = args.output_file
 
-schemas = sample_schema(tables, columns)
-for index, schema in enumerate(schemas):
-    file = open(os.path.join(os.pardir, "output/query_" + str(index + 1) + ".sql"), "w+")
-    file.write('---------- [DDL]\n')
-    file.write(str(schema));
-    file.write('\n\n')
-    file.write('---------- [Queries]\n')
-    for i in range(0, selects):
-        select = sample_select(schema)
-        file.write(str(select))
-        file.write('\n\n')
-    file.close();    
+    # output file / stdout
+    f = sys.stdout if output_file is None else open(output_file, "w+")
 
+    schemas = sample_schema(ntables, ncolumns)
+    queries = [sample_select(schemas[0])]
+
+    f.write('---------- [DDL]\n')
+    for schema in schemas:
+        f.write(str(schema) + "\n");
+
+    f.write('\n---------- [Queries]\n')
+    for q in queries:
+        f.write(str(q) + "\n")
+
+    f.close();

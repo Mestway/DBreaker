@@ -194,8 +194,7 @@ class ColRef(object):
         self.col_name = col_name
 
     def __str__(self):
-        # TODO: convert the tree to a string
-        pass
+        return self.col_name
 
 
 class Const(object):
@@ -204,25 +203,15 @@ class Const(object):
         self.val = val
 
     def __str__(self):
-        # TODO: convert the tree to a string
-        pass
+        return self.val
 
 
 class Expr(object):
     # expression includes boolean expression, 
     # numeric expression, aggregation expression, and interval expression
-    def __init__(self, op, vals):
-        self.op = op
-        self.vals = vals
-
-    def __str__(self):
-        # TODO: convert the tree to a string
-        pass
-
-class Expression:
     pass
 
-class BinaryExpression(Expression):
+class BinaryExpr(Expr):
     def __init__(self, op, left, right):
         self.left = left
         self.op = op
@@ -231,7 +220,7 @@ class BinaryExpression(Expression):
     def __str__(self):
         return "(%s %s %s)" % (self.left, self.op, self.right)
 
-class UnaryExpression(Expression):
+class UnaryExpr(Expr):
     # +Right or -Right
     def __init__(self, op, right):
         self.op = op
@@ -240,7 +229,7 @@ class UnaryExpression(Expression):
     def __str__(self):
         return "(%s%s)" % (self.op, self.right)
 
-class FunctionExpression(Expression):
+class FunctionExpr(Expr):
     # COS(3) or MOD(5, 3)
     def __init__(self, op, *args):
         self.op = op
