@@ -7,10 +7,12 @@ RUN add-apt-repository universe
 RUN apt-get update && apt-get install -y git
 
 RUN apt-get update \
-  && apt-get install -y python3-pip python3-dev \
-  && cd /usr/local/bin \
-  && ln -s /usr/bin/python3 python \
-  && pip3 install --upgrade pip
+    && add-apt-repository ppa:jonathonf/python-3.6 \
+    && apt-get update \
+    && apt-get install -y build-essential python3.6 python3.6-dev python3-pip python3.6-venv \
+    && python3.6 -m pip install pip --upgrade \
+    && python3.6 -m pip install wheel \
+    && ln -s /usr/bin/python3.6 python
 
 RUN apt-get update && \
   apt-get install -y --no-install-recommends locales && \

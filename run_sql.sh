@@ -8,17 +8,14 @@ PASSWORD="dbtest"
 SQL_FILE="example/example.sql"
 OUTPUT_CMD=""
 
-echo $#
+if [ $# -ge 1 ]
+  then
+    SQL_FILE=$1
+fi
 
 if [ $# -ge 2 ]
   then
-    DDL_FILE=$1
-    SQL_FILE=$2
-fi
-
-if [ $# -ge 3 ]
-  then
-    OUTPUT_CMD="--output-file $3"
+    OUTPUT_CMD="--output-file $2"
 fi
 
 echo $SQL_FILE
