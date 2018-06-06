@@ -19,10 +19,11 @@ selects = args.selects
 
 schemas = sample_schema(tables, columns)
 for index, schema in enumerate(schemas):
-    file = open(os.path.join(os.pardir, "output/query" + str(index + 1) + ".sql"), "w+")
+    file = open(os.path.join(os.pardir, "output/query_" + str(index + 1) + ".sql"), "w+")
+    file.write('---------- [DDL]\n')
     file.write(str(schema));
     file.write('\n\n')
-    file.write('----------------------\n')
+    file.write('---------- [Queries]\n')
     for i in range(0, selects):
         select = sample_select(schema)
         file.write(str(select))
