@@ -25,6 +25,10 @@ Examples of DDL_FILE.ddl.sql and SQL_FILE.sql can be found in [calcite_interface
 
 ## Python Setup
 
+Required Python Version: 3.6 
+
+(Peplace `pip` and `python` with `pip3` and `python3` if Python 3.6 is not your default python in the following commands)
+
 In order to run query generator, you need to install the following python utils.
 
 Install requirements
@@ -35,9 +39,9 @@ Install dbreaker in editable mode
 
 `pip install -e .`
 
-## Run Generator
+Run Generator
 
-`python3 main.py --tables 5 --columns 5 --selects 5`
+`python main.py --tables 5 --columns 5 --selects 5`
 
 This command generates 5 seperate query files each containing a create table statement
 of a table with 5 columns along with 5 selects to go with it.
